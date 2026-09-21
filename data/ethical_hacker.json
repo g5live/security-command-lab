@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You have physically connected to a local network and need to discover active hosts without relying on ICMP (ping).",
+    "objective": "Use arp-scan to sweep the local subnet connected to your default interface.",
+    "validation": {
+      "required": ["arp-scan", "-l"],
+      "forbidden": ["nmap"],
+      "hints": {
+        "-l": "Hint: The -l (localnet) flag automatically generates addresses from the interface configuration."
+      }
+    },
+    "explanation": "ARP operates at Layer 2. If you are on the same physical subnet, ARP scans cannot be blocked by local software firewalls like ICMP can."
+  },
+  {
+    "id": 2,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You are preparing for a wireless assessment and need to bypass MAC filtering on an access point.",
+    "objective": "Use macchanger to set a fully random MAC address on your 'eth0' interface.",
+    "validation": {
+      "required": ["macchanger", "-r", "eth0"],
+      "forbidden": ["ifconfig"],
+      "hints": {
+        "-r": "Hint: The -r flag sets a random MAC, rather than letting you specify a specific spoofed one."
+      }
+    },
+    "explanation": "macchanger modifies your network interface's hardware address, useful for anonymity or impersonating authorized devices."
+  },
+  {
+    "id": 3,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "To capture 802.11 wireless frames, your wireless adapter (wlan0) must be taken out of managed mode.",
+    "objective": "Use airmon-ng to start monitor mode on 'wlan0'.",
+    "validation": {
+      "required": ["airmon-ng", "start", "wlan0"],
+      "forbidden": ["airodump-ng"],
+      "hints": {
+        "start": "Hint: You must explicitly pass the 'start' command before the interface name."
+      }
+    },
+    "explanation": "airmon-ng is part of the Aircrack-ng suite. Starting monitor mode allows the adapter to capture all wireless traffic in the air, not just traffic destined for it."
+  },
+  {
+    "id": 4,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You need to capture raw network traffic on the 'eth0' interface and save it to a file for later review in Wireshark.",
+    "objective": "Use tcpdump to capture traffic on eth0 and write it to 'capture.pcap'.",
+    "validation": {
+      "required": ["tcpdump", "-i", "eth0", "-w", "capture.pcap"],
+      "forbidden": ["wireshark"],
+      "hints": {
+        "-w": "Hint: Use the -w flag to write to a file instead of standard output."
+      }
+    },
+    "explanation": "tcpdump is the premier CLI packet capture tool. Writing to a .pcap file preserves the raw packet data for deep GUI analysis later."
+  },
+  {
+    "id": 5,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You want to quickly verify connectivity to a target (10.10.10.1) but you only want to send exactly 4 ICMP echo requests.",
+    "objective": "Use ping to send 4 packets to the target IP.",
+    "validation": {
+      "required": ["ping", "-c", "4", "10.10.10.1"],
+      "forbidden": ["-t"],
+      "hints": {
+        "-c": "Hint: In Linux, ping runs forever by default. Use -c (count) to limit it."
+      }
+    },
+    "explanation": "ping -c 4 verifies routing and host availability without flooding the terminal indefinitely."
+  },
+  {
+    "id": 6,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You have a file named 'capture.pcap' and want to view its contents directly in the terminal without opening a GUI.",
+    "objective": "Use tshark to read the packet capture file.",
+    "validation": {
+      "required": ["tshark", "-r", "capture.pcap"],
+      "forbidden": ["cat", "wireshark"],
+      "hints": {
+        "-r": "Hint: You must use the -r flag to 'read' from a file."
+      }
+    },
+    "explanation": "tshark is the command-line version of Wireshark, allowing you to script and grep through packet captures easily."
+  },
+  {
+    "id": 7,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You want to launch the Metasploit Framework console without displaying the standard ASCII art banner.",
+    "objective": "Start msfconsole in quiet mode.",
+    "validation": {
+      "required": ["msfconsole", "-q"],
+      "forbidden": ["msfvenom"],
+      "hints": {
+        "-q": "Hint: The -q flag initializes the framework quietly, saving screen space."
+      }
+    },
+    "explanation": "msfconsole -q drops you directly into the Metasploit prompt, which is faster and cleaner for scripted or rapid engagements."
+  },
+  {
+    "id": 8,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You want to map the network path and identify routers between your machine and 10.10.10.1.",
+    "objective": "Run a traceroute to the target IP.",
+    "validation": {
+      "required": ["traceroute", "10.10.10.1"],
+      "forbidden": ["ping"],
+      "hints": {
+        "tracert": "Hint: 'tracert' is the Windows command. Use the Linux equivalent."
+      }
+    },
+    "explanation": "traceroute manipulates the TTL (Time to Live) field in IP packets to map out the network hops to a destination."
+  },
+  {
+    "id": 9,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You need to determine the operating system of 10.10.10.1 before selecting an exploit.",
+    "objective": "Run an Nmap scan targeting only OS detection.",
+    "validation": {
+      "required": ["nmap", "-O", "10.10.10.1"],
+      "forbidden": ["-A"],
+      "hints": {
+        "-A": "Hint: -A runs OS detection, version detection, scripts, and traceroute. The objective asks ONLY for OS detection."
+      }
+    },
+    "explanation": "Nmap's -O flag analyzes responses to specific TCP/UDP packets and compares them to a database to guess the target's operating system."
+  },
+  {
+    "id": 10,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You extracted Linux password hashes into 'hashes.txt'. You prefer John the Ripper over Hashcat for this specific format.",
+    "objective": "Run 'john', specifying the wordlist as 'rockyou.txt', against the hashes file.",
+    "validation": {
+      "required": ["john", "--wordlist=rockyou.txt", "hashes.txt"],
+      "forbidden": ["hashcat"],
+      "hints": {
+        "--wordlist": "Hint: John requires the specific --wordlist= format for passing dictionary files."
+      }
+    },
+    "explanation": "John the Ripper is highly effective at auto-detecting hash formats (like Linux SHA-512) and cracking them against standard dictionaries."
+  }
+]

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>g5live AAR // Results</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .results-container {
+            background-color: #1e1e1e;
+            padding: 3rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* Dynamic border color based on pass/fail */
+            border-top: 5px solid {% if passed %}#28a745{% else %}#dc3545{% endif %};
+        }
+        .status {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: {% if passed %}#28a745{% else %}#dc3545{% endif %};
+        }
+        .metric-box {
+            background-color: #2d2d2d;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            display: flex;
+            justify-content: space-around;
+        }
+        .metric {
+            display: flex;
+            flex-direction: column;
+        }
+        .metric-value { font-size: 1.8rem; font-weight: bold; color: #FF8C00; }
+        .metric-label { font-size: 0.9rem; color: #C0C0C0; text-transform: uppercase; }
+
+        .home-btn {
+            display: block;
+            width: 100%;
+            background-color: #C0C0C0;
+            color: #121212;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            box-sizing: border-box;
+            transition: background-color 0.3s;
+        }
+        .home-btn:hover { background-color: #ffffff; }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <h2>After Action Report</h2>
+
+        <div class="status">
+            {% if passed %}
+                SESSION PASSED
+            {% else %}
+                SESSION FAILED
+            {% endif %}
+        </div>
+
+        <p>CompTIA Security+ simulated threshold requires 80% to pass.</p>
+
+        <div class="metric-box">
+            <div class="metric">
+                <span class="metric-value">{{ score }} / {{ total }}</span>
+                <span class="metric-label">Scenarios Solved</span>
+            </div>
+            <div class="metric">
+                <span class="metric-value">{{ pass_rate }}%</span>
+                <span class="metric-label">Accuracy Rate</span>
+            </div>
+        </div>
+
+        <a href="/" class="home-btn">Return to Dashboard</a>
+    </div>
+</body>
+</html>

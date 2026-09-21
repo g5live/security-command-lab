@@ -1,0 +1,156 @@
+[
+  {
+    "id": 1,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "A rogue device is suspected on the local subnet (192.168.1.0/24). You are tasked with identifying active hosts without completing a full TCP handshake.",
+    "objective": "Enter the Nmap command to perform a stealth SYN scan against the entire /24 network.",
+    "validation": {
+      "required": ["nmap", "-sS", "192.168.1.0/24"],
+      "forbidden": ["sudo"],
+      "hints": {
+        "sudo": "Hint: You do not need root privileges for this specific lab task. Drop 'sudo'.",
+        "192.168.1.0": "Hint: Make sure you scan the entire subnet using CIDR notation (/24), not just the network ID.",
+        "-sT": "Hint: That is a full connect scan. We need a stealth scan."
+      }
+    },
+    "explanation": "The -sS flag instructs Nmap to perform a TCP SYN (Stealth) scan. It sends a SYN packet and waits for a response, but tears down the connection before it completes."
+  },
+  {
+    "id": 2,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You are securing an SSH private key file named 'id_rsa'. Currently, other users on the system can read it, which is a critical security risk.",
+    "objective": "Change the file permissions using octal notation so that ONLY the owner can read and write to 'id_rsa'.",
+    "validation": {
+      "required": ["chmod", "600", "id_rsa"],
+      "forbidden": ["sudo", "777", "700"],
+      "hints": {
+        "777": "Hint: 777 grants full read/write/execute access to everyone. This makes the key completely insecure.",
+        "700": "Hint: 700 grants execute permissions. SSH keys do not need to be executable."
+      }
+    },
+    "explanation": "chmod 600 sets the permissions so the user (owner) can read (4) and write (2), totaling 6. Group and Others get 0."
+  },
+  {
+    "id": 3,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You downloaded a suspected malware sample named 'payload.bin'. Before analyzing it, verify its integrity.",
+    "objective": "Generate a SHA-256 cryptographic hash for 'payload.bin'.",
+    "validation": {
+      "required": ["sha256sum", "payload.bin"],
+      "forbidden": ["md5sum", "sha1sum"],
+      "hints": {
+        "md5sum": "Hint: MD5 is prone to collisions. The objective requires SHA-256."
+      }
+    },
+    "explanation": "sha256sum calculates the SHA-256 hash of a file to check against threat intelligence databases."
+  },
+  {
+    "id": 4,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "During a network investigation, you observe traffic communicating with 'evilcorp.local'.",
+    "objective": "Use the 'dig' command to query ONLY the MX (Mail Exchange) records for 'evilcorp.local'.",
+    "validation": {
+      "required": ["dig", "evilcorp.local", "MX"],
+      "forbidden": ["nslookup"],
+      "hints": {
+        "nslookup": "Hint: The objective specifically asks you to use 'dig'."
+      }
+    },
+    "explanation": "dig MX evilcorp.local specifically filters the DNS query to only return Mail Exchange records."
+  },
+  {
+    "id": 5,
+    "difficulty": "basic",
+    "type": "practical",
+    "scenario": "You suspect a brute-force attack against your Linux server.",
+    "objective": "Search the '/var/log/auth.log' file for the exact phrase 'Failed password'.",
+    "validation": {
+      "required": ["grep", "Failed password", "/var/log/auth.log"],
+      "forbidden": ["cat", "less", "tail"],
+      "hints": {
+        "cat": "Hint: Using 'cat' on a large log file floods the terminal. Use a filtering tool."
+      }
+    },
+    "explanation": "grep filters massive log files and prints only the lines containing the specified string."
+  },
+  {
+    "id": 6,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "CRITICAL INCIDENT: A compromised host is actively exfiltrating data to 10.10.10.50.",
+    "objective": "Write an iptables rule to append (-A) a block to the OUTPUT chain, dropping all traffic destined (-d) for 10.10.10.50.",
+    "validation": {
+      "required": ["iptables", "-A", "OUTPUT", "-d", "10.10.10.50", "-j", "DROP"],
+      "forbidden": ["INPUT", "REJECT"],
+      "hints": {
+        "INPUT": "Hint: We need to stop data from leaving, so block the OUTPUT.",
+        "REJECT": "Hint: In incident response, it is safer to DROP the packets silently."
+      }
+    },
+    "explanation": "This host-based firewall command stops the local machine from sending network packets to the malicious IP."
+  },
+  {
+    "id": 7,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You need to quickly check which ports are actively listening on your local Linux server to identify unauthorized services.",
+    "objective": "Use the 'ss' command to show all listening TCP and UDP ports without resolving service names.",
+    "validation": {
+      "required": ["ss", "-tuln"],
+      "forbidden": ["netstat"],
+      "hints": {
+        "netstat": "Hint: netstat is deprecated on modern Linux systems. Use 'ss'."
+      }
+    },
+    "explanation": "ss -tuln (TCP, UDP, Listening, Numeric) is the modern, faster replacement for netstat."
+  },
+  {
+    "id": 8,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "A junior admin accidentally changed the owner of the '/etc/shadow' file to a standard user.",
+    "objective": "Use 'chown' to restore the owner and group of '/etc/shadow' to 'root'.",
+    "validation": {
+      "required": ["chown", "root:root", "/etc/shadow"],
+      "forbidden": ["chmod"],
+      "hints": {
+        "chmod": "Hint: chmod changes permissions. We need to change ownership."
+      }
+    },
+    "explanation": "chown root:root changes both the user owner and the group owner to root simultaneously."
+  },
+  {
+    "id": 9,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "Your server's Uncomplicated Firewall (UFW) is currently disabled, leaving the system exposed.",
+    "objective": "Enable the UFW firewall.",
+    "validation": {
+      "required": ["ufw", "enable"],
+      "forbidden": ["disable", "status"],
+      "hints": {
+        "status": "Hint: Checking the status doesn't turn it on. Use the enable command."
+      }
+    },
+    "explanation": "ufw enable activates the default firewall rules and ensures UFW starts on boot."
+  },
+  {
+    "id": 10,
+    "difficulty": "standard",
+    "type": "practical",
+    "scenario": "You need to quickly review the last 15 log entries in the general system log to spot a recent crash.",
+    "objective": "Output exactly the last 15 lines of '/var/log/syslog'.",
+    "validation": {
+      "required": ["tail", "-n", "15", "/var/log/syslog"],
+      "forbidden": ["cat", "head"],
+      "hints": {
+        "head": "Hint: 'head' shows the beginning of the file. You need the end."
+      }
+    },
+    "explanation": "tail -n 15 specifically prints the final 15 lines of a file, essential for real-time troubleshooting."
+  }
+]

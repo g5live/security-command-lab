@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>g5live Scenario Environment</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Left Pane: The Briefing */
+        .lesson-pane {
+            flex: 1;
+            padding: 2rem;
+            background-color: #1e1e1e;
+            border-right: 2px solid #333;
+            overflow-y: auto;
+        }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;}
+        .scenario-box { background-color: #2d2d2d; padding: 1.5rem; border-radius: 8px; border-left: 5px solid #FF8C00; margin-bottom: 20px; line-height: 1.5;}
+        .objective-box { background-color: #2d2d2d; padding: 1.5rem; border-radius: 8px; border-left: 5px solid #9b59b6; margin-bottom: 20px;}
+        .explanation-box { display: none; background-color: #28a745; color: #121212; padding: 1.5rem; border-radius: 8px; margin-top: 20px; font-weight: bold;}
+
+        /* Right Pane: The Workspace */
+        .workspace-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #000000;
+        }
+        .terminal-header {
+            background-color: #333;
+            color: #C0C0C0;
+            padding: 10px 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .terminal-window {
+            padding: 20px;
+            flex: 1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+        }
+        .prompt { color: #28a745; margin-right: 10px; }
+        .prompt-path { color: #3498db; margin-right: 10px; }
+        .input-line { display: flex; align-items: center; margin-bottom: 10px; }
+
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            color: #f0f0f0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            flex: 1;
+            outline: none;
+            caret-color: #FF8C00;
+        }
+
+        .feedback { margin-top: 15px; font-family: monospace; display: none; }
+        .error-text { color: #dc3545; }
+
+        .run-btn {
+            background-color: #C0C0C0;
+            color: #1e1e1e;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: flex-end;
+            margin: 20px;
+            border-radius: 4px;
+        }
+        .run-btn:hover { background-color: #ffffff; }
+    </style>
+</head>
+<body>
+
+    <!-- Left Side: Scenario and Instructions -->
+    <div class="lesson-pane">
+        <div class="header">
+            <h2>Scenario Training</h2>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Timer Display -->
+                <span id="timer-display" style="font-family: monospace; font-size: 1.2rem; background: #333; padding: 5px 10px; border-radius: 4px; color: #FF8C00;">00:00</span>
+                <span style="color: #9b59b6; font-weight: bold;">g5live // Lab</span>
+            </div>
+        </div>
+
+        <div class="scenario-box">
+            <h3>Situation Report</h3>
+            <p>{{ scenario.scenario }}</p>
+        </div>
+
+        <div class="objective-box">
+            <h3>Objective</h3>
+            <p>{{ scenario.objective }}</p>
+        </div>
+
+        <div id="explanation-box" class="explanation-box">
+            <p><strong>Success:</strong> <span id="explanation-text">{{ scenario.explanation }}</span></p>
+
+            {% if next_index is not none %}
+                <button class="run-btn" style="background-color: #121212; color: white;" onclick="window.location.href='/scenario/{{ next_index }}'">Next Scenario</button>
+            {% else %}
+                <button class="run-btn" style="background-color: #9b59b6; color: white;" onclick="window.location.href='/results'">Finish Lab & View Results</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Side: Simulated Terminal -->
+    <div class="workspace-pane">
+        <div class="terminal-header">
+            <span>Terminal</span>
+            <span>bash</span>
+        </div>
+
+        <div class="terminal-window">
+            <div class="input-line">
+                <span class="prompt">g5@kali</span><span class="prompt-path">:~/labs$</span>
+                <input type="text" id="cli-input" placeholder="Type command here..." autocomplete="off" spellcheck="false" data-expected="{{ scenario.expected_command }}" data-index="{{ index }}">
+            </div>
+
+            <div id="terminal-feedback" class="feedback"></div>
+        </div>
+
+            <div id="terminal-feedback" class="feedback"></div>
+        </div>
+
+        <button class="run-btn" onclick="executeCommand()">Run Command</button>
+    </div>
+
+    <script>
+        // Setup the live countdown timer
+        let timeLeft = {{ time_left }};
+        const timerDisplay = document.getElementById('timer-display');
+
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                window.location.href = '/results'; // Force end when time is up
+                return;
+            }
+
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent =
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+
+            // Turn timer red in the final 60 seconds
+            if (timeLeft <= 60) timerDisplay.style.color = '#dc3545';
+
+            timeLeft--;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer(); // Call immediately so there's no 1-second delay on load
+
+        // Allow pressing Enter to submit
+        document.getElementById("cli-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                executeCommand();
+            }
+        });
+
+        async function executeCommand() {
+            const inputField = document.getElementById('cli-input');
+            const userCommand = inputField.value.trim();
+
+            // UPDATED: Now looks for 'data-index' instead of 'data-id'
+            const index = parseInt(inputField.getAttribute('data-index'));
+
+            const feedbackBox = document.getElementById('terminal-feedback');
+            const explanationBox = document.getElementById('explanation-box');
+
+            feedbackBox.style.display = 'block';
+            feedbackBox.innerHTML = `> Executing: ${userCommand}<br><span style="color: #3498db;">[*] Validating syntax...</span>`;
+
+            try {
+                // Send the command to the Python backend
+                const response = await fetch('/api/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // UPDATED: Now sends 'index' instead of 'scenario_id'
+                    body: JSON.stringify({ command: userCommand, index: index })
+                });
+
+                const data = await response.json();
+
+                if (data.correct) {
+                    feedbackBox.innerHTML = `> Executing: ${userCommand}<br><span style="color: #28a745;">${data.message}</span>`;
+                    explanationBox.style.display = 'block';
+                    inputField.disabled = true;
+                } else {
+                    feedbackBox.innerHTML = `> Executing: ${userCommand}<br><span class="error-text">${data.message}</span>`;
+                }
+            } catch (error) {
+                feedbackBox.innerHTML = `<span class="error-text">[-] System Error: Could not reach validation server.</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
