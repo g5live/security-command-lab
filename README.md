@@ -78,7 +78,7 @@ git clone https://github.com/g5live/security-command-lab.git
 cd security-command-lab
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install Flask
+python -m pip install -r requirements.txt
 python sec-command.py
 ```
 
