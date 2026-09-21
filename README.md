@@ -84,6 +84,14 @@ python sec-command.py
 
 Open `http://127.0.0.1:5000` in a browser.
 
+The application generates a temporary session secret when it starts. To keep browser sessions valid across application restarts, provide your own secret:
+
+```bash
+SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')" python sec-command.py
+```
+
+Debug mode is disabled by default. It can be enabled for local development with `FLASK_DEBUG=1`; do not expose the development server to an untrusted network.
+
 On Windows, activate the virtual environment with:
 
 ```powershell
@@ -97,6 +105,14 @@ On Windows, activate the virtual environment with:
 3. Install Flask into that interpreter.
 4. Run `sec-command.py`.
 5. Open the local address shown in the Run window.
+
+## Run the Tests
+
+The regression tests use Python's built-in `unittest` framework, so no additional test package is required:
+
+```bash
+python -m unittest discover -s tests -v
+```
 
 ## Project Structure
 
@@ -113,6 +129,10 @@ security-command-lab/
 │   ├── index.html         # Scenario and simulated terminal view
 │   ├── menu.html          # Training-session configuration
 │   └── results.html       # Final score and session result
+├── tests/
+│   ├── test_app.py        # Flask route and session regression tests
+│   └── test_engine.py     # Scenario loading and validation tests
+├── requirements.txt       # Reproducible Python dependency versions
 └── sec-command.py         # Flask application and routes
 ```
 
@@ -163,7 +183,7 @@ Develop the website beyond the current basic Flask interface with:
 - Scenario filters and session summaries
 - Progress and performance information
 - Improved navigation, accessibility and responsive presentation
-- Stronger input validation, automated testing and safer application configuration
+- Expanded test coverage, CSRF protection and deployment-ready configuration
 
 ## Responsible Use
 

@@ -66,6 +66,8 @@
 
         .feedback { margin-top: 15px; font-family: monospace; display: none; }
         .error-text { color: #dc3545; }
+        .status-info { color: #3498db; }
+        .status-success { color: #28a745; }
 
         .run-btn {
             background-color: #C0C0C0;
@@ -125,11 +127,8 @@
         <div class="terminal-window">
             <div class="input-line">
                 <span class="prompt">g5@kali</span><span class="prompt-path">:~/labs$</span>
-                <input type="text" id="cli-input" placeholder="Type command here..." autocomplete="off" spellcheck="false" data-expected="{{ scenario.expected_command }}" data-index="{{ index }}">
+                <input type="text" id="cli-input" placeholder="Type command here..." autocomplete="off" spellcheck="false" data-index="{{ index }}">
             </div>
-
-            <div id="terminal-feedback" class="feedback"></div>
-        </div>
 
             <div id="terminal-feedback" class="feedback"></div>
         </div>
@@ -164,7 +163,7 @@
         updateTimer(); // Call immediately so there's no 1-second delay on load
 
         // Allow pressing Enter to submit
-        document.getElementById("cli-input").addEventListener("keypress", function(event) {
+        document.getElementById("cli-input").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 executeCommand();
@@ -175,36 +174,47 @@
             const inputField = document.getElementById('cli-input');
             const userCommand = inputField.value.trim();
 
-            // UPDATED: Now looks for 'data-index' instead of 'data-id'
             const index = parseInt(inputField.getAttribute('data-index'));
 
             const feedbackBox = document.getElementById('terminal-feedback');
             const explanationBox = document.getElementById('explanation-box');
 
             feedbackBox.style.display = 'block';
-            feedbackBox.innerHTML = `> Executing: ${userCommand}<br><span style="color: #3498db;">[*] Validating syntax...</span>`;
+            renderFeedback(feedbackBox, userCommand, '[*] Validating syntax...', 'status-info');
 
             try {
-                // Send the command to the Python backend
                 const response = await fetch('/api/validate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // UPDATED: Now sends 'index' instead of 'scenario_id'
                     body: JSON.stringify({ command: userCommand, index: index })
                 });
 
                 const data = await response.json();
 
-                if (data.correct) {
-                    feedbackBox.innerHTML = `> Executing: ${userCommand}<br><span style="color: #28a745;">${data.message}</span>`;
+                if (response.ok && data.correct) {
+                    renderFeedback(feedbackBox, userCommand, data.message, 'status-success');
                     explanationBox.style.display = 'block';
                     inputField.disabled = true;
                 } else {
-                    feedbackBox.innerHTML = `> Executing: ${userCommand}<br><span class="error-text">${data.message}</span>`;
+                    renderFeedback(feedbackBox, userCommand, data.message, 'error-text');
                 }
             } catch (error) {
-                feedbackBox.innerHTML = `<span class="error-text">[-] System Error: Could not reach validation server.</span>`;
+                renderFeedback(feedbackBox, '', '[-] System Error: Could not reach validation server.', 'error-text');
             }
+        }
+
+        function renderFeedback(container, command, message, statusClass) {
+            container.replaceChildren();
+
+            if (command) {
+                container.append(document.createTextNode(`> Executing: ${command}`));
+                container.append(document.createElement('br'));
+            }
+
+            const status = document.createElement('span');
+            status.className = statusClass;
+            status.textContent = message;
+            container.append(status);
         }
     </script>
 </body>
